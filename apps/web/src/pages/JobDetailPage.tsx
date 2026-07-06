@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "../lib/auth";
 import type { JobPosting } from "../lib/types";
+import { BriefcaseIcon } from "../components/icons";
 
 export default function JobDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -65,16 +66,32 @@ export default function JobDetailPage() {
   }
 
   if (loading) return <p className="muted">Loading…</p>;
-  if (!posting) return <p>This posting doesn't exist or isn't visible to you.</p>;
+  if (!posting)
+    return (
+      <div className="empty">
+        This posting doesn't exist or isn't visible to you.
+      </div>
+    );
 
   return (
     <div className="narrow">
-      <h1>{posting.title}</h1>
-      <p className="muted">
-        {posting.department || "General"}
-        {posting.visibility === "internal" && " · internal only"}
-      </p>
-      <p className="prewrap">{posting.description}</p>
+      <div className="job-row" style={{ marginBottom: "1rem" }}>
+        <span className="icon-tile">
+          <BriefcaseIcon />
+        </span>
+        <div className="grow">
+          <h1 style={{ margin: 0 }}>{posting.title}</h1>
+          <div className="meta">
+            <span>{posting.department || "General"}</span>
+            {posting.visibility === "internal" && <span>Internal only</span>}
+            <span>Posted {new Date(posting.created_at).toLocaleDateString()}</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="card" style={{ marginBottom: "0.75rem" }}>
+        <p className="prewrap">{posting.description}</p>
+      </div>
 
       <section className="card">
         <h2>Apply</h2>
@@ -85,10 +102,10 @@ export default function JobDetailPage() {
         ) : applied ? (
           <p>
             You've applied to this position. Track it under{" "}
-            <Link to="/applications">My applications</Link>.
+            <Link to="/applications">My Applications</Link>.
           </p>
         ) : (
-          <form onSubmit={apply} className="stack">
+          <form onSubmit={apply} className="stack" style={{ marginTop: "0.5rem" }}>
             <label>
               Resume / CV (PDF)
               <input

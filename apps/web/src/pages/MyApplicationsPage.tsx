@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "../lib/auth";
 import type { Application } from "../lib/types";
+import { BriefcaseIcon } from "../components/icons";
 
 export default function MyApplicationsPage() {
   const { session } = useAuth();
@@ -25,18 +26,31 @@ export default function MyApplicationsPage() {
 
   return (
     <div>
-      <h1>My applications</h1>
+      <div className="page-head">
+        <h1>My Applications</h1>
+        <p>Track where each of your applications is in the hiring pipeline.</p>
+      </div>
       {applications.length === 0 && (
-        <p className="muted">You haven't applied to anything yet.</p>
+        <div className="empty">You haven't applied to anything yet.</div>
       )}
       <ul className="cards">
         {applications.map((a) => (
-          <li key={a.id} className="card row">
-            <div>
-              <strong>{a.job_postings?.title ?? "Posting"}</strong>
-              <p className="muted">{a.job_postings?.department || "General"}</p>
+          <li key={a.id} className="card">
+            <div className="job-row">
+              <span className="icon-tile">
+                <BriefcaseIcon />
+              </span>
+              <div className="grow">
+                <strong>{a.job_postings?.title ?? "Posting"}</strong>
+                <div className="meta">
+                  <span>{a.job_postings?.department || "General"}</span>
+                  <span>
+                    Applied {new Date(a.created_at).toLocaleDateString()}
+                  </span>
+                </div>
+              </div>
+              <span className={`badge stage-${a.stage}`}>{a.stage}</span>
             </div>
-            <span className={`badge stage-${a.stage}`}>{a.stage}</span>
           </li>
         ))}
       </ul>
