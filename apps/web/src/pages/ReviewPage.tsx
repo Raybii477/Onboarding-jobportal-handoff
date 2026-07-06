@@ -5,8 +5,45 @@ import type {
   OnboardingCase,
   SubmissionStatus,
 } from "../lib/types";
+import { CheckIcon, ClockIcon, DocIcon, RedoIcon } from "../components/icons";
 
 type CaseWithSubs = OnboardingCase & { submissions: DocumentSubmission[] };
+
+function tileFor(status: SubmissionStatus) {
+  switch (status) {
+    case "approved":
+      return (
+        <span className="icon-tile tint-emerald">
+          <CheckIcon />
+        </span>
+      );
+    case "submitted":
+      return (
+        <span className="icon-tile tint-amber">
+          <ClockIcon />
+        </span>
+      );
+    case "rejected":
+    case "resubmit_requested":
+      return (
+        <span className="icon-tile tint-red">
+          <RedoIcon />
+        </span>
+      );
+    default:
+      return (
+        <span className="icon-tile tint-slate">
+          <DocIcon />
+        </span>
+      );
+  }
+}
+
+function initials(nameOrEmail: string) {
+  const parts = nameOrEmail.trim().split(/\s+/);
+  if (parts.length >= 2) return parts[0][0] + parts[1][0];
+  return nameOrEmail.slice(0, 2);
+}
 
 export default function ReviewPage() {
   const [cases, setCases] = useState<CaseWithSubs[]>([]);
@@ -69,62 +106,111 @@ export default function ReviewPage() {
 
   return (
     <div>
-      <h1>Document review</h1>
+      <div className="page-head">
+        <h1>Onboarding &amp; Document Review</h1>
+        <p>
+          {cases.filter((c) => c.status !== "complete").length} active case
+          {cases.filter((c) => c.status !== "complete").length === 1 ? "" : "s"}
+        </p>
+      </div>
       {error && <p className="error">{error}</p>}
-      {cases.length === 0 && <p className="muted">No onboarding cases yet.</p>}
-      {cases.map((c) => (
-        <section key={c.id} className="card">
-          <div className="row">
-            <h2>{c.profiles?.full_name || c.profiles?.email}</h2>
-            <span className={`badge status-${c.status}`}>
-              {c.status === "complete" ? "complete" : "in progress"}
-            </span>
-          </div>
-          <ul className="plain">
-            {c.submissions.map((s) => (
-              <li key={s.id} className="review-row">
-                <div className="row">
-                  <div>
-                    <strong>{s.document_types?.name}</strong>
-                    {s.document_types?.required === false && (
-                      <span className="muted"> (optional)</span>
-                    )}
-                    {s.file_path && (
-                      <button className="link" onClick={() => openFile(s.file_path!)}>
-                        View file
-                      </button>
-                    )}
-                  </div>
-                  <span className={`badge status-${s.status}`}>{s.status}</span>
+      {cases.length === 0 && (
+        <div className="empty">
+          No onboarding cases yet — they appear automatically when an
+          application is marked hired.
+        </div>
+      )}
+      <div className="stack">
+        {cases.map((c) => {
+          const who = c.profiles?.full_name || c.profiles?.email || "";
+          const required = c.submissions.filter(
+            (s) => s.document_types?.required !== false,
+          );
+          const approved = required.filter((s) => s.status === "approved").length;
+          return (
+            <section key={c.id} className="card">
+              <div className="case-head">
+                <span className="avatar">{initials(who)}</span>
+                <div>
+                  <h2>{who}</h2>
+                  <span className="muted">
+                    Documents: {approved} / {required.length} approved
+                  </span>
                 </div>
-                {s.status === "submitted" && (
-                  <div className="stack">
-                    <input
-                      placeholder="Reviewer notes (required when sending back)"
-                      value={notes[s.id] ?? ""}
-                      onChange={(e) =>
-                        setNotes({ ...notes, [s.id]: e.target.value })
-                      }
-                    />
-                    <div className="actions">
-                      <button onClick={() => decide(s, "approved")}>Approve</button>
-                      <button
-                        className="secondary"
-                        onClick={() => decide(s, "resubmit_requested")}
-                      >
-                        Request resubmission
-                      </button>
-                      <button className="danger" onClick={() => decide(s, "rejected")}>
-                        Reject
-                      </button>
+                <span
+                  className={`badge ${
+                    c.status === "complete" ? "status-complete" : "status-in_progress"
+                  }`}
+                >
+                  {c.status === "complete" ? "Complete" : "In progress"}
+                </span>
+              </div>
+              <ul className="plain">
+                {c.submissions.map((s) => (
+                  <li key={s.id} className="review-row">
+                    <div className="job-row">
+                      {tileFor(s.status)}
+                      <div className="grow">
+                        <strong>{s.document_types?.name}</strong>
+                        {s.document_types?.required === false && (
+                          <span className="muted"> (optional)</span>
+                        )}
+                        <div className="meta">
+                          {s.submitted_at && (
+                            <span>
+                              Uploaded{" "}
+                              {new Date(s.submitted_at).toLocaleDateString()}
+                            </span>
+                          )}
+                          {s.file_path && (
+                            <button
+                              className="link"
+                              onClick={() => openFile(s.file_path!)}
+                            >
+                              View file
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                      <span className={`badge status-${s.status}`}>
+                        {s.status === "submitted" ? "Pending review" : s.status}
+                      </span>
                     </div>
-                  </div>
-                )}
-              </li>
-            ))}
-          </ul>
-        </section>
-      ))}
+                    {s.status === "submitted" && (
+                      <div className="review-actions">
+                        <input
+                          placeholder="Reviewer notes (required when sending back)"
+                          value={notes[s.id] ?? ""}
+                          onChange={(e) =>
+                            setNotes({ ...notes, [s.id]: e.target.value })
+                          }
+                        />
+                        <div className="actions">
+                          <button onClick={() => decide(s, "approved")}>
+                            <CheckIcon /> Approve
+                          </button>
+                          <button
+                            className="danger-outline"
+                            onClick={() => decide(s, "resubmit_requested")}
+                          >
+                            Request Revision
+                          </button>
+                          <button
+                            className="outline"
+                            onClick={() => decide(s, "rejected")}
+                          >
+                            Reject
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          );
+        })}
+      </div>
     </div>
   );
 }

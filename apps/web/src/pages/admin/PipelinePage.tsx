@@ -41,36 +41,39 @@ export default function PipelinePage() {
 
   return (
     <div>
-      <h1>Hiring pipeline</h1>
+      <div className="page-head">
+        <h1>Hiring Pipeline</h1>
+        <p>{applications.length} applications across all stages</p>
+      </div>
       {error && <p className="error">{error}</p>}
-      {STAGES.map((stage) => {
-        const inStage = applications.filter((a) => a.stage === stage);
-        if (inStage.length === 0) return null;
-        return (
-          <section key={stage}>
-            <h2 className="stage-heading">
-              <span className={`badge stage-${stage}`}>{stage}</span>{" "}
-              <span className="muted">({inStage.length})</span>
-            </h2>
-            <ul className="cards">
-              {inStage.map((a) => (
-                <li key={a.id} className="card row">
-                  <div>
+      <div className="kanban">
+        {STAGES.map((stage) => {
+          const inStage = applications.filter((a) => a.stage === stage);
+          return (
+            <div key={stage} className="kanban-col">
+              <div className="kanban-head">
+                <span className={`dot dot-${stage}`} />
+                {stage}
+                <span className="count">{inStage.length}</span>
+              </div>
+              <ul className="cards">
+                {inStage.map((a) => (
+                  <li key={a.id} className="card kanban-card">
                     <strong>{a.profiles?.full_name || a.profiles?.email}</strong>
-                    <p className="muted">
-                      {a.job_postings?.title} · applied{" "}
-                      {new Date(a.created_at).toLocaleDateString()}
-                    </p>
+                    <div className="meta">
+                      <span>{a.job_postings?.title}</span>
+                      <span>{new Date(a.created_at).toLocaleDateString()}</span>
+                    </div>
                     {a.resume_file_path && (
-                      <button
-                        className="link"
-                        onClick={() => openResume(a.resume_file_path!)}
-                      >
-                        View resume
-                      </button>
+                      <p>
+                        <button
+                          className="link"
+                          onClick={() => openResume(a.resume_file_path!)}
+                        >
+                          View resume
+                        </button>
+                      </p>
                     )}
-                  </div>
-                  <div className="actions">
                     <select
                       value={a.stage}
                       onChange={(e) =>
@@ -83,14 +86,13 @@ export default function PipelinePage() {
                         </option>
                       ))}
                     </select>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </section>
-        );
-      })}
-      {applications.length === 0 && <p className="muted">No applications yet.</p>}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

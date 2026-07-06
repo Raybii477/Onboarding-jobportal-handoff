@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { supabase } from "../../lib/supabase";
 import { useAuth } from "../../lib/auth";
+import { BriefcaseIcon } from "../../components/icons";
 import type { JobPosting, PostingStatus, PostingVisibility } from "../../lib/types";
 
 const EMPTY = {
@@ -57,31 +58,43 @@ export default function PostingsPage() {
 
   return (
     <div>
-      <h1>Manage postings</h1>
+      <div className="page-head">
+        <h1>Jobs</h1>
+        <p>Create postings, publish them, and close them when filled.</p>
+      </div>
 
-      <section className="card">
+      <section className="card" style={{ marginBottom: "1.5rem" }}>
         <h2>New posting</h2>
-        <form onSubmit={createPosting} className="stack">
-          <input
-            required
-            placeholder="Title"
-            value={form.title}
-            onChange={(e) => setForm({ ...form, title: e.target.value })}
-          />
-          <textarea
-            required
-            rows={6}
-            placeholder="Description"
-            value={form.description}
-            onChange={(e) => setForm({ ...form, description: e.target.value })}
-          />
-          <input
-            placeholder="Department"
-            value={form.department}
-            onChange={(e) => setForm({ ...form, department: e.target.value })}
-          />
+        <form onSubmit={createPosting} className="stack" style={{ marginTop: "0.75rem" }}>
           <label>
-            Visibility{" "}
+            Title
+            <input
+              required
+              placeholder="e.g. Senior Software Engineer"
+              value={form.title}
+              onChange={(e) => setForm({ ...form, title: e.target.value })}
+            />
+          </label>
+          <label>
+            Description
+            <textarea
+              required
+              rows={6}
+              placeholder="Role description, responsibilities, requirements…"
+              value={form.description}
+              onChange={(e) => setForm({ ...form, description: e.target.value })}
+            />
+          </label>
+          <label>
+            Department
+            <input
+              placeholder="e.g. Engineering"
+              value={form.department}
+              onChange={(e) => setForm({ ...form, department: e.target.value })}
+            />
+          </label>
+          <label>
+            Visibility
             <select
               value={form.visibility}
               onChange={(e) =>
@@ -93,31 +106,43 @@ export default function PostingsPage() {
               <option value="both">Both</option>
             </select>
           </label>
-          <button type="submit">Create draft</button>
+          <button type="submit" className="dark">
+            + Create draft
+          </button>
         </form>
         {error && <p className="error">{error}</p>}
       </section>
 
       <ul className="cards">
         {postings.map((p) => (
-          <li key={p.id} className="card row">
-            <div>
-              <strong>{p.title}</strong>
-              <p className="muted">
-                {p.department || "General"} · {p.visibility} ·{" "}
-                <span className={`badge status-${p.status}`}>{p.status}</span>
-              </p>
-            </div>
-            <div className="actions">
-              {p.status === "draft" && (
-                <button onClick={() => setStatus(p.id, "open")}>Publish</button>
-              )}
-              {p.status === "open" && (
-                <button onClick={() => setStatus(p.id, "closed")}>Close</button>
-              )}
-              {p.status === "closed" && (
-                <button onClick={() => setStatus(p.id, "open")}>Reopen</button>
-              )}
+          <li key={p.id} className="card">
+            <div className="job-row">
+              <span className="icon-tile">
+                <BriefcaseIcon />
+              </span>
+              <div className="grow">
+                <strong>{p.title}</strong>
+                <div className="meta">
+                  <span>{p.department || "General"}</span>
+                  <span>{p.visibility}</span>
+                </div>
+              </div>
+              <span className={`badge status-${p.status}`}>{p.status}</span>
+              <div className="actions">
+                {p.status === "draft" && (
+                  <button onClick={() => setStatus(p.id, "open")}>Publish</button>
+                )}
+                {p.status === "open" && (
+                  <button className="outline" onClick={() => setStatus(p.id, "closed")}>
+                    Close
+                  </button>
+                )}
+                {p.status === "closed" && (
+                  <button className="outline" onClick={() => setStatus(p.id, "open")}>
+                    Reopen
+                  </button>
+                )}
+              </div>
             </div>
           </li>
         ))}

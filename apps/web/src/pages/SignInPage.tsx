@@ -37,38 +37,48 @@ export default function SignInPage() {
 
   return (
     <div className="narrow">
-      <h1>Sign in</h1>
+      <div className="page-head">
+        <h1>Sign in</h1>
+        <p>Candidates use a magic link; employees use company single sign-on.</p>
+      </div>
 
-      <section className="card">
-        <h2>Candidates</h2>
-        <p className="muted">
-          We'll email you a magic link — no password needed.
-        </p>
-        {sent ? (
-          <p>Check your inbox for the sign-in link.</p>
-        ) : (
-          <form onSubmit={sendMagicLink} className="stack">
-            <input
-              type="email"
-              required
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            <button type="submit">Email me a magic link</button>
-          </form>
-        )}
-      </section>
+      <div className="stack">
+        <section className="card">
+          <h2>Candidates</h2>
+          <p className="muted">
+            We'll email you a magic link — no password needed.
+          </p>
+          {sent ? (
+            <p>Check your inbox for the sign-in link.</p>
+          ) : (
+            <form onSubmit={sendMagicLink} className="stack" style={{ marginTop: "0.75rem" }}>
+              <label>
+                Email address
+                <input
+                  type="email"
+                  required
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </label>
+              <button type="submit">Email me a magic link</button>
+            </form>
+          )}
+        </section>
 
-      <section className="card">
-        <h2>Employees</h2>
-        <p className="muted">
-          Use your company account (single sign-on via Entra ID).
-        </p>
-        <button onClick={signInWithEntra}>Sign in with company account</button>
-      </section>
+        <section className="card">
+          <h2>Employees</h2>
+          <p className="muted">
+            Use your company account (single sign-on via Entra ID).
+          </p>
+          <button className="dark" style={{ marginTop: "0.75rem" }} onClick={signInWithEntra}>
+            Sign in with company account
+          </button>
+        </section>
 
-      {error && <p className="error">{error}</p>}
+        {error && <p className="error">{error}</p>}
+      </div>
     </div>
   );
 }
