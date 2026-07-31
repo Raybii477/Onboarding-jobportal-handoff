@@ -41,6 +41,8 @@ supabase db push                      # applies supabase/migrations in order
 
 The migrations create the full schema, enable RLS on every table, create the two **private** storage buckets (`resumes`, `onboarding-documents`) with their policies, install the workflow triggers, and seed a placeholder document checklist.
 
+`20260731000007_document_files.sql` backfills itself: every file already recorded on a `document_submissions` row becomes that submission's first `document_files` row, so it is safe to apply to a project that already holds documents.
+
 ### 2. Auth providers
 
 - **Candidates:** email magic-link auth works out of the box (enable the Email provider in Supabase Auth).
@@ -88,6 +90,19 @@ Deploy `apps/web` as the project root (framework: Vite). Set `VITE_SUPABASE_URL`
 3. The `send-notification` function emails the new hire (via Resend) their document upload link.
 4. The new hire uploads documents; reviewers approve or send back for resubmission (each decision emails the new hire).
 5. When every **required** document is approved, a trigger auto-marks the case **complete** and notifies all admins.
+
+## Documents and their files
+
+A checklist item (`document_submissions`) is not one file. Each uploaded file is a `document_files` row, which gives two things:
+
+- **Several files per checklist item** — both sides of an ID, a multi-part contract.
+- **Version history** — when a reviewer sends a document back and the new hire uploads again, the previous attempt is *retired*, not overwritten. Retired files stay readable by the new hire and by staff, under "Previous versions".
+
+The retiring is done by the `retire_previous_attempt` trigger, not the client: the client inserts the new files and then flips the submission back to `submitted`, and the trigger tells the two attempts apart by the reviewer's decision timestamp. A second trigger keeps the legacy `document_submissions.file_path` pointing at the newest active file, so nothing has to maintain that pointer by hand.
+
+Reviewers work through **Review** as a file explorer — applicants as folders on the left with a name/email search, the selected applicant's documents on the right, each expanding to its files plus history. Approve / Request Revision / Reject stay on the expanded document.
+
+Storage keys keep the existing `onboarding-documents/{case_id}/{document_type_id}/{filename}` convention, so the bucket policies are unchanged; the original filename is stored on the row for display.
 
 ## Open questions (from the handoff — confirm before go-live)
 
