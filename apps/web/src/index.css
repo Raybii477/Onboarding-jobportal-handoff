@@ -857,15 +857,6 @@ button.link:hover {
 
 /* ---------- Review (document vetting) ---------- */
 
-.review-row {
-  border-top: 1px solid var(--border);
-  padding: 1rem 0;
-}
-
-.review-row:first-child {
-  border-top: none;
-}
-
 .review-actions {
   display: grid;
   gap: 0.6rem;
@@ -883,8 +874,395 @@ button.link:hover {
   margin: 0;
 }
 
+.case-head .grow {
+  flex: 1;
+  min-width: 0;
+}
+
 .case-head .badge {
   margin-left: auto;
+}
+
+/* ---------- Applicant file explorer ---------- */
+
+.explorer {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 1rem;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .explorer {
+    grid-template-columns: 1fr;
+  }
+}
+
+.explorer-sidebar {
+  min-width: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem;
+  position: sticky;
+  top: 1rem;
+}
+
+/* Grid items default to min-width:auto, so a long applicant name or
+   filename would set a min-content floor and spill out of the pane. */
+.folder-list > li,
+.doc-list > li,
+.file-list > li {
+  min-width: 0;
+}
+
+.explorer-search {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--muted);
+}
+
+.explorer-search svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.explorer-search input {
+  flex: 1;
+  min-width: 0;
+  padding: 0.6rem 0;
+  border: none;
+  background: none;
+  outline: none;
+}
+
+.explorer-count {
+  margin: 0.6rem 0.25rem;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.folder-list {
+  gap: 0.15rem;
+}
+
+.folder {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.55rem 0.6rem;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  color: var(--text-2);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.folder:hover {
+  background: var(--surface-tint);
+}
+
+.folder.selected {
+  background: #dde9ff;
+  color: var(--indigo-dark);
+  font-weight: 600;
+}
+
+.folder .grow {
+  flex: 1;
+  min-width: 0;
+}
+
+.folder-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.folder-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.folder-chevron {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  color: var(--muted);
+}
+
+.pill-count {
+  flex-shrink: 0;
+  padding: 0 0.5rem;
+  border-radius: 9999px;
+  background: var(--amber-50);
+  color: var(--amber-700);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.explorer-empty {
+  padding: 0.5rem 0.25rem;
+  font-size: 0.9rem;
+}
+
+.explorer-main {
+  min-width: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1.25rem 1.5rem;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.breadcrumb svg {
+  width: 14px;
+  height: 14px;
+}
+
+.breadcrumb strong {
+  color: var(--navy);
+}
+
+.doc-list {
+  gap: 0.5rem;
+}
+
+.doc-item {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.doc-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border: none;
+  border-radius: 0;
+  background: var(--surface);
+  color: var(--text-2);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.doc-row:hover,
+.doc-row.expanded {
+  background: var(--bg);
+}
+
+.doc-row .grow {
+  flex: 1;
+  min-width: 0;
+}
+
+.doc-row strong {
+  color: var(--navy);
+}
+
+.doc-chevron {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  color: var(--muted);
+  transition: transform 0.15s ease;
+}
+
+.doc-chevron.open {
+  transform: rotate(90deg);
+}
+
+.doc-body {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+/* On a narrow screen the tile + title + badge + chevron stop fitting on one
+   line. Squeezing them all in leaves the title wrapping a word at a time, so
+   let the status drop to its own line and give the title the full width. */
+@media (max-width: 560px) {
+  .doc-row {
+    flex-wrap: wrap;
+    gap: 0.5rem 0.6rem;
+    padding: 0.75rem;
+  }
+
+  /* Small enough to stay on the tile's line, large enough that the
+     status badge cannot squeeze in beside it. */
+  .doc-row .grow {
+    flex: 1 1 8rem;
+  }
+
+  .doc-row .icon-tile {
+    width: 36px;
+    height: 36px;
+  }
+
+  .doc-row .icon-tile svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  /* Line the status up under the title rather than under the tile. */
+  .doc-row .badge {
+    margin-left: 2.85rem;
+  }
+
+  .doc-chevron {
+    margin-left: auto;
+  }
+
+  .case-head {
+    flex-wrap: wrap;
+  }
+
+  /* The upload date is the first thing worth losing to a filename. */
+  .file-row .file-date {
+    display: none;
+  }
+
+  .doc-body {
+    padding: 0.75rem;
+  }
+}
+
+/* ---------- File rows (review + onboarding) ---------- */
+
+.file-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.25rem;
+}
+
+.file-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.45rem 0.6rem;
+  border-radius: 6px;
+  background: var(--bg);
+  font-size: 0.9rem;
+}
+
+.file-row .grow {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+}
+
+.file-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  color: var(--muted);
+}
+
+.file-meta {
+  flex-shrink: 0;
+  font-size: 0.8rem;
+}
+
+.file-row.superseded {
+  opacity: 0.7;
+}
+
+.file-row.superseded .grow {
+  text-decoration: line-through;
+}
+
+.icon-btn {
+  flex-shrink: 0;
+  padding: 0.2rem;
+  border: none;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.icon-btn:hover {
+  background: none;
+  color: var(--red-700);
+}
+
+.icon-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.file-history summary {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.1rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+  cursor: pointer;
+  list-style: none;
+}
+
+.file-history summary::-webkit-details-marker {
+  display: none;
+}
+
+.file-history summary:hover {
+  color: var(--indigo-dark);
+}
+
+.file-history summary svg {
+  width: 15px;
+  height: 15px;
+}
+
+.file-history[open] summary {
+  margin-bottom: 0.35rem;
+}
+
+/* Checklist rows carry their own file list underneath. */
+
+.checklist-item {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.checklist-item .file-list,
+.checklist-item .file-history {
+  padding-left: 3.5rem;
+}
+
+.checklist-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-shrink: 0;
 }
 
 /* ---------- Misc ---------- */

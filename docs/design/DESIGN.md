@@ -183,3 +183,10 @@ Tables are the backbone of the onboarding module. They should use a "clean borde
 
 ### Progress Steppers
 Essential for the onboarding journey. Steppers should be horizontal on desktop and vertical on mobile, using Emerald for completed steps and Deep Navy for the active step.
+
+### Applicant File Explorer
+The reviewer workspace is a two-pane explorer: a 300px folder rail on the left, the selected applicant's documents on the right. The rail is a bordered surface card, not the navy sidebar — it is content, not navigation. Selected folders take the same `#DDE9FF` tint as the active nav item so the two selection models read alike.
+
+Documents are collapsed rows that expand in place; the chevron rotates 90° rather than swapping glyph. File rows sit on the `--bg` tint inside the white card to read as nested content, with the filename as the click target and size/date right-aligned in `body-sm` muted. Superseded versions stay reachable behind a disclosure, rendered at 70% opacity with a strikethrough filename — visibly present, visibly not current.
+
+Below 900px the two panes stack, folder rail first.
