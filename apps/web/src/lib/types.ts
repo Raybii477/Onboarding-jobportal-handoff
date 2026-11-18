@@ -15,6 +15,15 @@ export type SubmissionStatus =
   | "approved"
   | "rejected"
   | "resubmit_requested";
+export type NotificationType =
+  | "application_received"
+  | "stage_changed"
+  | "onboarding_created"
+  | "document_decision"
+  | "case_complete"
+  | "new_application"
+  | "document_submitted"
+  | "staff_message";
 
 export interface Profile {
   user_id: string;
@@ -23,6 +32,8 @@ export interface Profile {
   full_name: string;
   email: string;
 }
+
+type PersonRef = Pick<Profile, "full_name" | "email">;
 
 export interface JobPosting {
   id: string;
@@ -43,8 +54,33 @@ export interface Application {
   stage: ApplicationStage;
   referred_by: string | null;
   created_at: string;
-  job_postings?: Pick<JobPosting, "title" | "department">;
-  profiles?: Pick<Profile, "full_name" | "email">;
+  updated_at?: string;
+  job_postings?: Pick<JobPosting, "title" | "department"> | null;
+  profiles?: PersonRef | null;
+}
+
+export interface ApplicationEvent {
+  id: string;
+  application_id: string;
+  kind: "applied" | "stage_changed";
+  from_stage: ApplicationStage | null;
+  to_stage: ApplicationStage | null;
+  actor_id: string | null;
+  created_at: string;
+  actor?: PersonRef | null;
+  applications?: {
+    profiles?: PersonRef | null;
+    job_postings?: Pick<JobPosting, "title"> | null;
+  } | null;
+}
+
+export interface ApplicationNote {
+  id: string;
+  application_id: string;
+  author_id: string;
+  body: string;
+  created_at: string;
+  profiles?: PersonRef | null;
 }
 
 export interface OnboardingCase {
@@ -53,7 +89,7 @@ export interface OnboardingCase {
   source_application_id: string | null;
   status: CaseStatus;
   created_at: string;
-  profiles?: Pick<Profile, "full_name" | "email">;
+  profiles?: PersonRef | null;
 }
 
 export interface DocumentType {
@@ -93,6 +129,15 @@ export interface DocumentSubmission {
   document_files?: DocumentFile[];
 }
 
+export interface AppNotification {
+  id: string;
+  user_id: string;
+  type: NotificationType;
+  payload: Record<string, string | null>;
+  created_at: string;
+  read_at: string | null;
+}
+
 export function activeFiles(s: DocumentSubmission): DocumentFile[] {
   return (s.document_files ?? [])
     .filter((f) => !f.superseded_at)
@@ -105,13 +150,7 @@ export function supersededFiles(s: DocumentSubmission): DocumentFile[] {
     .sort((a, b) => b.uploaded_at.localeCompare(a.uploaded_at));
 }
 
-export function formatFileSize(bytes: number | null): string {
-  if (bytes === null) return "";
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
-
+/** Every stage, in pipeline order. */
 export const STAGES: ApplicationStage[] = [
   "applied",
   "screening",
@@ -120,3 +159,31 @@ export const STAGES: ApplicationStage[] = [
   "hired",
   "rejected",
 ];
+
+/** The forward path a candidate sees; "rejected" leaves it. */
+export const PROGRESS_STAGES: ApplicationStage[] = [
+  "applied",
+  "screening",
+  "interview",
+  "offer",
+  "hired",
+];
+
+export const STAGE_LABEL: Record<ApplicationStage, string> = {
+  applied: "Applied",
+  screening: "Screening",
+  interview: "Interview",
+  offer: "Offer",
+  hired: "Hired",
+  rejected: "Rejected",
+};
+
+/** Stage colours: mid-lightness hues that also read on the dark theme. */
+export const STAGE_COLOR: Record<ApplicationStage, string> = {
+  applied: "#64748B",
+  screening: "#6366F1",
+  interview: "#8B5CF6",
+  offer: "#D97706",
+  hired: "#10B981",
+  rejected: "#EF4444",
+};

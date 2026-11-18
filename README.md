@@ -100,9 +100,33 @@ A checklist item (`document_submissions`) is not one file. Each uploaded file is
 
 The retiring is done by the `retire_previous_attempt` trigger, not the client: the client inserts the new files and then flips the submission back to `submitted`, and the trigger tells the two attempts apart by the reviewer's decision timestamp. A second trigger keeps the legacy `document_submissions.file_path` pointing at the newest active file, so nothing has to maintain that pointer by hand.
 
-Reviewers work through **Review** as a file explorer — applicants as folders on the left with a name/email search, the selected applicant's documents on the right, each expanding to its files plus history. Approve / Request Revision / Reject stay on the expanded document.
+Reviewers work through **Review** in two tabs. **To review** is a split view: a queue of submitted documents (searchable by name or document), a preview with zoom and download, and a decision panel with checks, one-tap reasons for sending a document back, and keyboard shortcuts — `A` approves, `R` requests a revision. **All cases** lists applicants as folders with a name/email search, each expanding to its files and previous versions.
 
 Storage keys keep the existing `onboarding-documents/{case_id}/{document_type_id}/{filename}` convention, so the bucket policies are unchanged; the original filename is stored on the row for display.
+
+## Hiring pipeline
+
+Cards drag between stages, or select several and use the bulk bar (**Move to…**, **Email candidates**, **Reject**). Moving to **Hired** or **Rejected** asks first, because both email the candidate and hired opens an onboarding case. Clicking a name opens the candidate panel: stage, CV preview, internal notes, and history.
+
+- `application_events` records every stage change with who made it. Triggers write it; clients can't. Staff read all of it; an applicant reads their own application's stages, which is how **My applications** shows where a declined application stopped.
+- `application_notes` are staff-only and never visible to the candidate.
+- **Email candidates** calls `send_candidate_message()`, which checks the caller is staff and queues one message per application.
+
+## Notifications
+
+Every event that sends an email also appears in the app: a bell with an unread count for everyone signed in, and toasts for new hires on arrival. They arrive live over Supabase Realtime (the migration adds `notifications` to the `supabase_realtime` publication).
+
+Some events are in-app only — staff hear about each new application and each uploaded document without an email per event. Those rows have `email = false`; the pg_net trigger skips them, and `send-notification` skips them too in case a dashboard webhook is used instead. Recipients can only change `read_at` on their own rows (a column-level grant, not just a policy).
+
+Email templates live in `supabase/functions/send-notification` and escape every value they interpolate.
+
+## Themes
+
+Light, dark, or system, chosen per device under **Settings → Appearance** (stored in `localStorage`; the choice is applied before first paint, so dark mode never flashes white). All colours are tokens in `apps/web/src/index.css`; components never hard-code a colour, so both themes cover every screen.
+
+## Job descriptions
+
+Postings are plain text. A line starting `## ` becomes a heading and `- ` a bullet, so HR can structure a posting without a rich-text editor; the **Jobs** form offers a template. Text is always rendered as text, never as HTML.
 
 ## Open questions (from the handoff — confirm before go-live)
 
