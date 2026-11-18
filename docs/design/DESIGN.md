@@ -184,8 +184,20 @@ Tables are the backbone of the onboarding module. They should use a "clean borde
 ### Progress Steppers
 Essential for the onboarding journey. Steppers should be horizontal on desktop and vertical on mobile, using Emerald for completed steps and Deep Navy for the active step.
 
+### Dark Glow Theme
+The dark theme is the same layout with a different token set, never separate components. Ground `#0B1120`, surfaces `#111A2E`, hairlines `#222C44`; text `#E8EAF2`, muted `#8B91A7` (6:1 on the ground). Indigo lifts to `#6366F1` and carries the "glow": a soft indigo shadow on primary buttons and the brand mark, and blurred indigo light behind the hero and sign-in panel. Status colours keep their hue but move to translucent fills with light text (`#6EE7B7` on 12% emerald, and so on), so a badge reads the same in both themes. Glows and the shimmer are switched off under `prefers-reduced-motion`.
+
+### Status Is Never Colour Alone
+Every status pairs an icon with a word: a tick for approved, a clock for in review, a redo arrow for "needs another upload", a cross for rejected. Hue differences also differ in lightness, so the states stay distinct for colour-blind reviewers and in greyscale.
+
+### Hiring Pipeline
+Six stage columns, narrow enough (170px minimum) that all fit beside the sidebar on a 1440px screen — Hired and Rejected must always be drop targets without scrolling. Cards put avatar and checkbox on one row so the name gets the full width. A drag highlights the target column with a dashed indigo border and "Drop to move to …". Selecting cards raises a navy bulk bar at the bottom of the viewport. Moves that email the candidate ask first in a modal.
+
+### Document Review (Split View)
+Three columns: the queue (300px), the document (flexible), the decision (360px). The queue item in view takes the indigo tint with a 3px indigo inset on its left edge, like the active nav item. The document sits on the muted ground as a lifted page. Decision buttons show their keyboard shortcut as a small outlined key on the right.
+
 ### Applicant File Explorer
-The reviewer workspace is a two-pane explorer: a 300px folder rail on the left, the selected applicant's documents on the right. The rail is a bordered surface card, not the navy sidebar — it is content, not navigation. Selected folders take the same `#DDE9FF` tint as the active nav item so the two selection models read alike.
+The **All cases** tab is a two-pane explorer: a 300px folder rail on the left, the selected applicant's documents on the right. The rail is a bordered surface card, not the navy sidebar — it is content, not navigation. Selected folders take the same indigo tint as the review queue so the two selection models read alike.
 
 Documents are collapsed rows that expand in place; the chevron rotates 90° rather than swapping glyph. File rows sit on the `--bg` tint inside the white card to read as nested content, with the filename as the click target and size/date right-aligned in `body-sm` muted. Superseded versions stay reachable behind a disclosure, rendered at 70% opacity with a strikethrough filename — visibly present, visibly not current.
 
